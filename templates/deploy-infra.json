@@ -90,14 +90,10 @@
         "deployVmWinPriServer1": "deploy-vm-win-pri-1-cf-fe",
         "deployVmWinPriServer2": "deploy-vm-win-pri-1-cf-be",
         "deployVmWinPriServer3": "deploy-vm-win-pri-1-ncf-fe",
-        "replFabricContDstBeVm1": "a2areplconvm1be-eastus2",
-        "replFabricContDstFeVm1": "a2areplconvm1fe-eastus2",
-        "replFabricContSrcBeVm1": "a2areplconvm1be-centralus",
-        "replFabricContSrcFeVm1": "a2areplconvm1fe-centralus",
-        "replFabricObjDstBeVm1": "a2areplobjvm1be-eastus2",
-        "replFabricObjDstFeVm1": "a2areplobjvm1fe-eastus2",
-        "replFabricObjSrcBeVm1": "a2areplobjvm1be-centralus",
-        "replFabricObjSrcFeVm1": "a2areplobjvm1fe-centralus",
+        "replA2AFabricContDst": "a2areplcon-eastus2",
+        "replA2AFabricContSrc": "a2areplcon-centralus",
+        "replA2AFabricObjDst": "a2areplobj-eastus2",
+        "replA2AFabricObjSrc": "a2areplobj-centralus",
         "replMappingFailoverFeVm1": "a2afevm1recovery",
         "replMappingFailBackFeVm1": "a2afevm1failback",
         "replMappingFailoverBeVm1": "a2abevm1recovery",
@@ -590,7 +586,7 @@
                     "variables": {},
                     "resources": [
                         {
-                            "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjSrcFeVm1'))]",
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [],
@@ -602,11 +598,11 @@
                             }
                         },
                         {
-                            "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjDstFeVm1'))]",
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjDst'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]"
                             ],
                             "properties": {
                                 "customDetails": {
@@ -616,12 +612,12 @@
                             }
                         },     
                         {
-                            "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjSrcFeVm1'),'/',variables('replFabricContSrcFeVm1'))]",
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjDstFeVm1'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]"
                             ],
                             "properties": {
                                 "providerSpecificInput": [
@@ -632,12 +628,12 @@
                             }
                         },
                         {
-                            "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjDstFeVm1'),'/',variables('replFabricContDstFeVm1'))]",
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'), variables('replFabricContSrcFeVm1'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjDstFeVm1'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
                             ],
                             "properties": {
                                 "providerSpecificInput": [
