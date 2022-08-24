@@ -790,7 +790,7 @@
                                     "primaryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
                                 },
                                 "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replFabricObjDstFeVm1'))]",
-                                "recoveryNetworkId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                                "recoveryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                             }
                         },
                         {
@@ -805,7 +805,7 @@
                             "properties": {
                                 "fabricSpecificDetails": {
                                     "instanceType": "AzureToAzure",
-                                    "primaryNetworkId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                                    "primaryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                                 },
                                 "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replFabricObjSrcFeVm1'))]",
                                 "recoveryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
@@ -826,7 +826,7 @@
                                     "primaryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
                                 },
                                 "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replFabricObjDstBeVm1'))]",
-                                "recoveryNetworkId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                                "recoveryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                             }
                         },
                         {
@@ -841,7 +841,7 @@
                             "properties": {
                                 "fabricSpecificDetails": {
                                     "instanceType": "AzureToAzure",
-                                    "primaryNetworkId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                                    "primaryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                                 },
                                 "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replFabricObjSrcBeVm1'))]",
                                 "recoveryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
