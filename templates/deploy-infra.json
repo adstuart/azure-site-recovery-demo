@@ -600,7 +600,21 @@
                                     "location": "[variables('location')]"
                                 }
                             }
-                        }
+                        },
+                        {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjDstFeVm1'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'))]"
+                            ],
+                            "properties": {
+                                "customDetails": {
+                                    "instanceType": "Azure",
+                                    "location": "[parameters('secLocation')]"
+                                }
+                            }
+                        },
                     ]
                 }
             }
