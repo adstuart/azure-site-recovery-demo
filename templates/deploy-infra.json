@@ -642,7 +642,7 @@
                                     "location": "[parameters('secLocation')]"
                                 }
                             }
-                        }     
+                        },     
                         {
                             "name": "[concat(parameters('rsVaultName'),'/',variables('replFabricObjSrcFeVm1'),'/',variables('replFabricContSrcFeVm1'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
