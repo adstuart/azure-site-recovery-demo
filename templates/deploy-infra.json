@@ -131,7 +131,7 @@
         "wlSecVnetCidr": "10.1.0.0/16",
         "wlSecVnetName": "[concat('vnet-wl-sec', parameters('uniqueData'))]",
         "wlSecVnetWlBeSubnetCidr": "10.1.2.0/24",
-        "wlSecVnetWlFeSubnetCidr": "10.1.2.0/24"
+        "wlSecVnetWlFeSubnetCidr": "10.1.1.0/24"
     },
     "resources": [
         {
