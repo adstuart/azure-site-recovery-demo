@@ -70,9 +70,9 @@
         "deployInfRes": "deploy-inf-res",
         "deployRsVlt": "deploy-rs-vault",
         "deployRsVltReplPolicies": "deploy-rs-replication-policies",
-        "rgNamePriVlt": "[concat('rgbckvltpri', parameters('uniqueData'))]",
-        "rgNamePriWl": "[concat('rgbckwlpri', parameters('uniqueData'))]",
-        "rgNameSecWl": "[concat('rgbckwlsec', parameters('uniqueData'))]",
+        "rgNameSecVlt": "[concat('rgasrvltsec', parameters('uniqueData'))]",
+        "rgNamePriWl": "[concat('rgasrwlpri', parameters('uniqueData'))]",
+        "rgNameSecWl": "[concat('rgasrwlsec', parameters('uniqueData'))]",
         "templateUriLaw": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-law.json'))]",
         "templateUriRsVlt": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-rsv-vault.json'))]",
         "templateUriRsVltReplPolicies": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-rsv-replication-policies.json'))]",
@@ -92,10 +92,10 @@
                     "contentVersion": "1.0.0.0",
                     "resources": [
                         {
-                            "name": "[variables('rgNamePriVlt')]",
+                            "name": "[variables('rgNameSecVlt')]",
                             "type": "Microsoft.Resources/resourceGroups",
                             "apiVersion": "[variables('resourcesApiVersion')]",
-                            "location": "[parameters('location')]",
+                            "location": "[parameters('secLocation')]",
                             "tags": "[parameters('tags')]",
                             "properties": {
                             }
@@ -152,7 +152,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "[variables('resourcesApiVersion')]",
             "subscriptionId": "[subscription().subscriptionId]",
-            "resourceGroup": "[variables('rgNamePriVlt')]",
+            "resourceGroup": "[variables('rgNameSecVlt')]",
             "dependsOn": [
                 "[concat('Microsoft.Resources/deployments/', variables('deployLaw'))]"
             ],
@@ -183,7 +183,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "[variables('resourcesApiVersion')]",
             "subscriptionId": "[subscription().subscriptionId]",
-            "resourceGroup": "[variables('rgNamePriVlt')]",
+            "resourceGroup": "[variables('rgNameSecVlt')]",
             "dependsOn": [
                 "[concat('Microsoft.Resources/deployments/', variables('deployRsVlt'))]"
             ],
@@ -231,7 +231,7 @@
                         "value": "[reference(variables('deployRsVlt')).outputs.rsVaultName.value]"
                     },
                     "rsVaultRg": {
-                        "value": "[variables('rgNamePriVlt')]"
+                        "value": "[variables('rgNameSecVlt')]"
                     },
                     "secLocation": {
                         "value": "[parameters('secLocation')]"
