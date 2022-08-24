@@ -37,9 +37,11 @@
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
             "tags": "[parameters('tags')]",
             "properties": {
+                "providerSpecificInput": {
                     "instanceType": "A2A",
                     "appConsistentFrequencyInMinutes": 120,
                     "recoveryPointHistory": 4320
+                }
             }
         },
         {
@@ -48,8 +50,10 @@
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
             "tags": "[parameters('tags')]",
             "properties": {
+                "providerSpecificInput": {
                     "instanceType": "A2A",
                     "recoveryPointHistory": 4320
+                }
             }
         }
     ],
