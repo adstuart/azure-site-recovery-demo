@@ -606,7 +606,7 @@
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replFabricObjSrcFeVm1'))]"
                             ],
                             "properties": {
                                 "customDetails": {
@@ -614,7 +614,7 @@
                                     "location": "[parameters('secLocation')]"
                                 }
                             }
-                        },
+                        }
                     ]
                 }
             }
