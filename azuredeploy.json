@@ -221,6 +221,9 @@
                     "lawResourceId": {
                         "value": "[reference(variables('deployLaw')).outputs.logAnalyticsResourceId.value]"
                     },
+                    "priLocation": {
+                        "value": "[parameters('priLocation')]"
+                    },
                     "rsVaultRepPolicyFeResId": {
                         "value": "[reference(variables('deployRsVltReplPolicies')).outputs.cstRepPolFeResId.value]"
                     },
