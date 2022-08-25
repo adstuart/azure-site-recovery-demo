@@ -2,10 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
+        "priLocation": {
             "type": "string",
             "metadata": {
-                "description": "The location to deploy the resources. Modify template to allow additional regions"
+                "description": "The primary region to deploy resources."
             },
             "allowedValues": [
                 "centralus",
@@ -83,7 +83,7 @@
             "name": "[variables('deployRgs')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "[variables('resourcesApiVersion')]",
-            "location": "[parameters('location')]",
+            "location": "[parameters('priLocation')]",
             "subscriptionId": "[subscription().subscriptionId]",
             "properties": {
                 "mode": "Incremental",
@@ -104,7 +104,7 @@
                             "name": "[variables('rgNamePriWl')]",
                             "type": "Microsoft.Resources/resourceGroups",
                             "apiVersion": "[variables('resourcesApiVersion')]",
-                            "location": "[parameters('location')]",
+                            "location": "[parameters('priLocation')]",
                             "tags": "[parameters('tags')]",
                             "properties": {
                             }
