@@ -234,7 +234,7 @@
         },
         "replicationFabricSrcName": {
             "type": "string",
-            "value": "[variables('replA2AFabricContSrc')]"
+            "value": "[variables('replA2AFabricObjSrc')]"
         }
     }
 }
