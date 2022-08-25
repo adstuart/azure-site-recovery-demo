@@ -179,7 +179,9 @@
             ],
             "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
             "properties": {
-                "assignableScopes": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+                "assignableScopes": [
+                    "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+                ],
                 "description": "Allows Recovery Services Vault appropriate permissions to Storage Account",
                 "permissions": [
                     {
