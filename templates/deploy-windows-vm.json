@@ -330,7 +330,7 @@
     "outputs": {
         "dataManagedDiskResId": {
             "type": "string",
-            "value": "[resourceId('Microsoft.Compute/virtualMachines',parameters('vmName')).storageProfile.datadisks[0].managedDisk.id]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines',parameters('vmName'))).storageProfile.datadisks[0].managedDisk.id]"
         },
         "dataDiskType": {
             "type": "string",
@@ -338,7 +338,7 @@
         },
         "osManagedDiskResId": {
             "type": "string",
-            "value": "[resourceId('Microsoft.Compute/virtualMachines',parameters('vmName')).storageProfile.osDisk.managedDisk.id]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines',parameters('vmName'))).storageProfile.osDisk.managedDisk.id]"
         },
         "osDiskType": {
             "type": "string",
