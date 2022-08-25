@@ -38,7 +38,7 @@
         }
     },
     "variables": {
-        "authorizationApiVersion": "2020-04-01",
+        "authorizationApiVersion": "2022-04-01",
         "diagnosticApiVersion": "2017-05-01-preview",
         "rcvSvcVltApiVersion": "2022-04-01",
         "storageApiVersion": "2021-09-01",
