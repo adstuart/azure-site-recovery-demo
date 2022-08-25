@@ -8,6 +8,12 @@
                 "description": "The resource id of the Log Analytics Workspace"
             }
         },
+        "priLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the primary region resources will be deployed to"
+            }
+        },
         "rsVaultRepPolicyFeResId": {
             "type": "string",
             "metadata": {
@@ -35,7 +41,7 @@
         "secLocation": {
             "type": "string",
             "metadata": {
-                "description": "The name of the secondary region (must be the paired region)"
+                "description": "The name of the secondary region the VMs will failover to"
             }
         },
         "secResourceGroupName": {
@@ -80,7 +86,6 @@
         "resourcesApiVersion": "2020-06-01",
         "storageApiVersion": "2021-09-01",
         "availabilityZone": "1",
-        "location": "[resourceGroup().location]",
         "bastionName": "[concat('bst', parameters('uniqueData'))]",
         "bastionPublicIpName": "[concat('pip-bst', parameters('uniqueData'))]",
         "bastionSubnetName": "AzureBastionSubnet",
@@ -90,17 +95,17 @@
         "deployVmWinPriServer1": "deploy-vm-win-pri-1-cf-fe",
         "deployVmWinPriServer2": "deploy-vm-win-pri-1-cf-be",
         "deployVmWinPriServer3": "deploy-vm-win-pri-1-ncf-fe",
+        "priResourceGroupName": "[resourceGroup().name]",
         "replA2AFabricContDst": "a2areplcon-eastus2",
         "replA2AFabricContSrc": "a2areplcon-centralus",
-        "replA2AFabricObjDst": "a2areplobj-eastus2",
-        "replA2AFabricObjSrc": "a2areplobj-centralus",
+        "replA2AFabricObjDst": "[concat(parameters('secLocation'),'-a2afabric')]",
+        "replA2AFabricObjSrc": "[concat(parameters('priLocation'),'-a2afabric')]",
         "replA2AMappingFailover": "a2arecovery-centralus",
         "replA2AMappingFailBack": "a2afailback-eastus2",
         "replA2ABeMappingFailover": "a2aberecovery-centralus",
         "replA2ABeMappingFailBack": "a2abefailback-eastus2",
         "replNetworkMappingSrc": "a2acentustoeastus2nwmap",
         "replNetworkMappingDst": "a2aeastus2tocentusnwmap",
-        "rgInfraName": "[resourceGroup().name]",
         "storageAccountCacheName": "[concat('stcache', parameters('uniqueData'))]",
         "templateUriWin": "[concat(uri(deployment().properties.templateLink.uri,'deploy-windows-vm.json'))]",
         "vmSku": "Standard_D4s_v5",
@@ -131,10 +136,25 @@
     },
     "resources": [
         {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "name": "[variables('storageAccountCacheName')]",
+            "location": "[parameters('priLocation')]",
+            "tags": "[parameters('tags')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+            },
+            "resources": [
+            ]
+        },
+        {
             "name": "[variables('bastionPublicIpName')]",
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "tags": "[parameters('tags')]",
             "properties": {
                 "publicIpAllocationMethod": "Static"
@@ -147,7 +167,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('wlPriFeNsgName')]",
             "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "tags": "[parameters('tags')]",
             "properties": {
                 "securityRules": []
@@ -157,7 +177,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('wlPriBeNsgName')]",
             "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "tags": "[parameters('tags')]",
             "properties": {
                 "securityRules": []
@@ -176,21 +196,6 @@
                     "parameters": {},
                     "variables": {},
                     "resources": [
-                        {
-                            "type": "Microsoft.Storage/storageAccounts",
-                            "apiVersion": "[variables('storageApiVersion')]",
-                            "name": "[variables('storageAccountCacheName')]",
-                            "location": "[variables('location')]",
-                            "tags": "[parameters('tags')]",
-                            "kind": "Storage",
-                            "sku": {
-                                "name": "Standard_LRS"
-                            },
-                            "properties": {
-                            },
-                            "resources": [
-                            ]
-                        },
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
                             "name": "[variables('wlSecFeNsgName')]",
@@ -237,7 +242,7 @@
                                             }
                                         }
                                     },
-                                  {
+                                    {
                                         "name": "[variables('workloadBeSubnetName')]",
                                         "properties": {
                                             "addressPrefix": "[variables('wlSecVnetWlBeSubnetCidr')]",
@@ -260,7 +265,7 @@
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('wlPriVnetName')]",
             "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "tags": "[parameters('tags')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIpAddresses', variables('bastionPublicIpName'))]",
@@ -343,7 +348,7 @@
                             "name": "[concat(variables('wlSecVnetName'),'/',variables('wlSecPeerName'))]",
                             "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
                             "apiVersion": "[variables('networkApiVersion')]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('secLocation')]",
                             "properties": {
                                 "allowVirtualNetworkAccess": "true",
                                 "allowForwardedTraffic": "true",
@@ -362,7 +367,7 @@
             "name": "[variables('bastionName')]",
             "type": "Microsoft.Network/bastionHosts",
             "apiVersion": "[variables('networkApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIpAddresses', variables('bastionPublicIpName'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('wlPriVnetName'))]",
@@ -390,7 +395,7 @@
             "name": "[concat(variables('bastionName'),'/microsoft.insights/diag')]",
             "type": "Microsoft.Network/bastionHosts/providers/diagnosticSettings",
             "apiVersion": "[variables('diagnosticApiVersion')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('priLocation')]",
             "tags": "[parameters('tags')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/bastionHosts',variables('bastionName'))]"
@@ -593,7 +598,7 @@
                             "properties": {
                                 "customDetails": {
                                     "instanceType": "Azure",
-                                    "location": "[variables('location')]"
+                                    "location": "[parameters('priLocation')]"
                                 }
                             }
                         },
@@ -610,7 +615,7 @@
                                     "location": "[parameters('secLocation')]"
                                 }
                             }
-                        },     
+                        },
                         {
                             "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
@@ -724,9 +729,9 @@
                             "properties": {
                                 "fabricSpecificDetails": {
                                     "instanceType": "AzureToAzure",
-                                    "primaryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
+                                    "primaryNetworkId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
                                 },
-                                "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replA2AFabricObjDst'))]",
+                                "recoveryFabricName": "[variables('replA2AFabricObjDst')]",
                                 "recoveryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                             }
                         },
@@ -744,8 +749,8 @@
                                     "instanceType": "AzureToAzure",
                                     "primaryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
                                 },
-                                "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replA2AFabricObjSrc'))]",
-                                "recoveryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
+                                "recoveryFabricName": "[variables('replA2AFabricObjSrc')]",
+                                "recoveryNetworkId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
                             }
                         }
                     ]
