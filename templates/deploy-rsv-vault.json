@@ -182,7 +182,7 @@
             ],
             "scope": "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountCacheName'))]",
             "properties": {
-                "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                "roleDefinitionId": "[concat('/subscriptions/',subscription().id,'/providers/Microsoft.Authorization/roleDefinitions/','b24988ac-6180-42a0-ab88-20f7382dd24c')]",
                 "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
                 "principalType": "ServicePrincipal"
             }
@@ -197,7 +197,7 @@
             ],
             "scope": "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountCacheName'))]",
             "properties": {
-                "roleDefinitionId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+                "roleDefinitionId": "[concat('/subscriptions/',subscription().id,'/providers/Microsoft.Authorization/roleDefinitions/','ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
                 "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
                 "principalType": "ServicePrincipal"
             }
