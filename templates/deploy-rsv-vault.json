@@ -151,6 +151,10 @@
             "type": "string",
             "value": "[variables('vaultName')]"
         },
+        "rvVaultPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName'))).principalId]"
+        },
         "rsVaultResourceId": {
             "type": "string",
             "value": "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
