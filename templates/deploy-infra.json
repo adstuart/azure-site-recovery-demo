@@ -639,7 +639,7 @@
                                     "instanceType": "A2A",
                                     "agentAutoUpdateStatus": "Disabled"
                                 },
-                                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
+                                "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
                             }
                         },
                         {
@@ -656,9 +656,9 @@
                                     "instanceType": "A2A",
                                     "agentAutoUpdateStatus": "Disabled"
                                 },
-                                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
+                                "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
                             }
-                        },
+                        }
 
                     ]
                 }
