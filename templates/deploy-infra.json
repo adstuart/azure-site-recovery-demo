@@ -87,7 +87,7 @@
     },
     "variables": {
         "authorizatonApiVersion": "2020-04-01",
-        "diagnosticApiVersion": "2017-0-01-preview",
+        "diagnosticApiVersion": "2017-05-01-preview",
         "networkApiVersion": "2020-07-01",
         "rcvSvcVltApiVersion": "2022-04-01",
         "resourcesApiVersion": "2020-06-01",
