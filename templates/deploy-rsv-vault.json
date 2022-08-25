@@ -153,7 +153,7 @@
         },
         "rvVaultPrincipalId": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName'))).principalId]"
+            "value": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]"
         },
         "rsVaultResourceId": {
             "type": "string",
