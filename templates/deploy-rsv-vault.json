@@ -66,38 +66,11 @@
             ]
         },
         {
-            "name": "[variables('roleAssignmentVaultRoleStorageContributorGuid')]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "[variables('authorizationApiVersion')]",
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
-            ],
-            "properties": {
-                "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
-                "principalType": "ServicePrincipal"
-            }
-        },
-        {
-            "name": "[variables('roleAssignmentVaultRoleStorageBlobContributorGuid')]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "[variables('authorizationApiVersion')]",
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
-            ],
-            "properties": {
-                "roleDefinitionId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
-                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
-                "principalType": "ServicePrincipal"
-            }
-        },
-        {
             "name": "[variables('vaultName')]",
             "type": "Microsoft.RecoveryServices/vaults",
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
             "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
             ],
             "location": "[parameters('seclocation')]",
             "tags": "[parameters('tags')]",
@@ -200,6 +173,36 @@
             },
             "resources": [
             ]
+        },
+        {
+            "name": "[variables('roleAssignmentVaultRoleStorageContributorGuid')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "name": "[variables('roleAssignmentVaultRoleStorageBlobContributorGuid')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
         }
     ],
     "outputs": {
