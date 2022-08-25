@@ -162,7 +162,10 @@
                     "lawResourceId": {
                         "value": "[reference(variables('deployLaw')).outputs.logAnalyticsResourceId.value]"
                     },
-                    "location": {
+                    "priLocation": {
+                        "value": "[parameters('priLocation')]"
+                    },
+                    "secLocation": {
                         "value": "[parameters('secLocation')]"
                     },
                     "tags": {
@@ -233,11 +236,11 @@
                     "rsVaultName": {
                         "value": "[reference(variables('deployRsVlt')).outputs.rsVaultName.value]"
                     },
-                    "rsVaultPrincipalId": {
-                        "value": "[reference(variables('deployRsVlt')).outputs.rsVaultPrincipalId.value]"         
-                    },
                     "rsVaultRg": {
                         "value": "[variables('rgNameSecVlt')]"
+                    },
+                    "storageAccountCacheResId": {
+                        "value": "[reference(variables('deployRsVlt')).outputs.storageAccountCacheResId.value]"
                     },
                     "secLocation": {
                         "value": "[parameters('secLocation')]"

@@ -8,10 +8,16 @@
                 "description": "The resource id of the Log Analytics Workspace"
             }
         },
-        "location": {
+        "priLocation": {
             "type": "string",
             "metadata": {
-                "description": "The name of the location to deploy the Recovery Services Vault"
+                "description": "The name of the location where the VM resources will be deployed"
+            }
+        },
+        "secLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the location where the VM resources will recover to"
             }
         },
         "tags": {
@@ -32,8 +38,14 @@
         }
     },
     "variables": {
+        "authorizationApiVersion": "2020-04-01",
         "diagnosticApiVersion": "2017-05-01-preview",
         "rcvSvcVltApiVersion": "2022-04-01",
+        "storageApiVersion": "2021-09-01",
+        "roleAssignmentVaultRoleGuid": "[guid(subscription().id, parameters('uniqueData'), variables('storageAccountCacheName'))]",
+        "roleDefCustomVaultRoleName": "Custom Role - RSV Vault",
+        "roleDefGuid": "[guid(subscription().id, parameters('uniqueData'), variables('roleDefCustomVaultRoleName'))]",
+        "storageAccountCacheName": "[concat('stcache', parameters('uniqueData'))]",
         "vaultName": "[concat('vltasr',parameters('uniqueData'))]"
     },
     "resources": [
@@ -41,7 +53,7 @@
             "name": "[variables('vaultName')]",
             "type": "Microsoft.RecoveryServices/vaults",
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
-            "location": "[parameters('location')]",
+            "location": "[parameters('seclocation')]",
             "tags": "[parameters('tags')]",
             "sku": {
                 "name": "RS0",
@@ -68,7 +80,6 @@
                 "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
             ],
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
-            "location": "[parameters('location')]",
             "tags": "[parameters('tags')]",
             "properties": {
                 "enhancedSecurityState": "Disabled",
@@ -83,7 +94,6 @@
                 "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
             ],
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
-            "location": "[parameters('location')]",
             "tags": "[parameters('tags')]",
             "properties": {
                 "storageModelType": "ZoneRedundant"
@@ -93,7 +103,6 @@
             "name": "[concat(variables('vaultName'),'/microsoft.insights/diag')]",
             "type": "Microsoft.RecoveryServices/vaults/providers/diagnosticSettings",
             "apiVersion": "[variables('diagnosticApiVersion')]",
-            "location": "[parameters('location')]",
             "tags": "[parameters('tags')]",
             "dependsOn": [
                 "[resourceId('Microsoft.RecoveryServices/vaults/backupstorageconfig', variables('vaultName'), 'vaultstorageconfig')]"
@@ -144,6 +153,76 @@
             },
             "resources": [
             ]
+        },
+        {
+            "name": "[variables('storageAccountCacheName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[parameters('priLocation')]",
+            "tags": "[parameters('tags')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+            },
+            "resources": [
+            ]
+        },
+        {
+            "name": "[variables('roleDefGuid')]",
+            "type": "Microsoft.Authorization/roleDefinitions",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
+            ],
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+            "properties": {
+                "assignableScopes": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+                "description": "Allows Recovery Services Vault appropriate permissions to Storage Account",
+                "permissions": [
+                    {
+                        "actions": [
+                            "*"
+                        ],
+                        "dataActions": [
+                            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+                            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
+                            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
+                            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
+                            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
+                        ],
+                        "notActions": [
+                            "Microsoft.Authorization/*/Delete",
+                            "Microsoft.Authorization/*/Write",
+                            "Microsoft.Authorization/elevateAccess/Action",
+                            "Microsoft.Blueprint/blueprintAssignments/write",
+                            "Microsoft.Blueprint/blueprintAssignments/delete",
+                            "Microsoft.Compute/galleries/share/action"
+                        ],
+                        "notDataActions": [
+
+                        ]
+                    }
+                ],
+                "roleName": "[variables('roleDefCustomVaultRoleName')]",
+                "type": "customRole"
+            }
+        },
+        {
+            "name": "[variables('roleAssignmentVaultRoleGuid')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefGuid'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefGuid'))]",
+                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
         }
     ],
     "outputs": {
@@ -158,6 +237,10 @@
         "rsVaultResourceId": {
             "type": "string",
             "value": "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+        },
+        "storageAccountCacheResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
         }
     }
 }

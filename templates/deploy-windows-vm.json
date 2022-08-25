@@ -343,6 +343,10 @@
         "osDiskType": {
             "type": "string",
             "value": "[variables('dataDiskType')]"
+        },
+        "vmResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Compute/virtualMachines',parameters('vmName'))]"
         }
     }
 }
