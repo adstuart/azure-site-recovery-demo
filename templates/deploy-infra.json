@@ -138,21 +138,6 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "[variables('storageApiVersion')]",
-            "name": "[variables('storageAccountCacheName')]",
-            "location": "[parameters('priLocation')]",
-            "tags": "[parameters('tags')]",
-            "kind": "Storage",
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "properties": {
-            },
-            "resources": [
-            ]
-        },
-        {
             "name": "[variables('bastionPublicIpName')]",
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "[variables('networkApiVersion')]",
@@ -593,10 +578,27 @@
                     "variables": {},
                     "resources": [
                         {
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "apiVersion": "[variables('storageApiVersion')]",
+                            "name": "[variables('storageAccountCacheName')]",
+                            "location": "[parameters('priLocation')]",
+                            "tags": "[parameters('tags')]",
+                            "kind": "Storage",
+                            "sku": {
+                                "name": "Standard_LRS"
+                            },
+                            "properties": {
+                            },
+                            "resources": [
+                            ]
+                        },
+                        {
                             "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
-                            "dependsOn": [],
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
+                            ],
                             "properties": {
                                 "customDetails": {
                                     "instanceType": "Azure",
@@ -767,7 +769,7 @@
                                 "providerSpecificDetails": {
                                     "instanceType": "A2A",
                                     "recoveryAzureVMName": "[variables('vmWinPriServer1Name')]",
-                                    "fabricObjectId":"[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer1Name'))]",
+                                    "fabricObjectId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer1Name'))]",
                                     "recoveryContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
                                     "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                     "primaryFabricLocation": "[parameters('priLocation')]",
@@ -779,14 +781,14 @@
                                             "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                             "recoveryReplicaDiskAccountType": "[reference(variables('deployVmWinPriServer1')).outputs.osDiskType.value]",
                                             "recoveryTargetDiskAccountType": "[reference(variables('deployVmWinPriServer1')).outputs.osDiskType.value]",
-                                            "primaryStagingAzureStorageAccountId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+                                            "primaryStagingAzureStorageAccountId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
                                         },
                                         {
                                             "diskId": "[reference(variables('deployVmWinPriServer1')).outputs.dataManagedDiskResId.value]",
                                             "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                             "recoveryReplicaDiskAccountType": "[reference(variables('deployVmWinPriServer1')).outputs.dataDiskType.value]",
                                             "recoveryTargetDiskAccountType": "[reference(variables('deployVmWinPriServer1')).outputs.dataDiskType.value]",
-                                            "primaryStagingAzureStorageAccountId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+                                            "primaryStagingAzureStorageAccountId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
                                         }
                                     ]
                                 }
@@ -816,14 +818,14 @@
                                             "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                             "recoveryReplicaDiskAccountType": "[reference(variables('deployVmWinPriServer2')).outputs.osDiskType.value]",
                                             "recoveryTargetDiskAccountType": "[reference(variables('deployVmWinPriServer2')).outputs.osDiskType.value]",
-                                            "primaryStagingAzureStorageAccountId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+                                            "primaryStagingAzureStorageAccountId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
                                         },
                                         {
                                             "diskId": "[reference(variables('deployVmWinPriServer2')).outputs.dataManagedDiskResId.value]",
                                             "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                             "recoveryReplicaDiskAccountType": "[reference(variables('deployVmWinPriServer2')).outputs.dataDiskType.value]",
                                             "recoveryTargetDiskAccountType": "[reference(variables('deployVmWinPriServer2')).outputs.dataDiskType.value]",
-                                            "primaryStagingAzureStorageAccountId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+                                            "primaryStagingAzureStorageAccountId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
                                         }
                                     ]
                                 }
