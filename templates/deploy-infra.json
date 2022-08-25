@@ -659,6 +659,72 @@
                     "contentVersion": "1.0.0.0"
                 }
             }
+        },
+        {
+            "name": "[variables('deployVmReplVm2')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "resourceGroup": "[parameters('rsVaultRg')]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/',variables('deployVmReplVm1'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "dataDiskResourceId": {
+                        "value": "[reference(variables('deployVmWinPriServer2')).outputs.dataManagedDiskResId.value]"
+                    },
+                    "dataDiskType": {
+                        "value": "[reference(variables('deployVmWinPriServer2')).outputs.dataDiskType.value]"
+                    },
+                    "osDiskResourceId": {
+                        "value": "[reference(variables('deployVmWinPriServer2')).outputs.osManagedDiskResId.value]"
+                    },
+                    "osDiskType": {
+                        "value": "[reference(variables('deployVmWinPriServer2')).outputs.osDiskType.value]"
+                    },
+                    "priLocation": {
+                        "value": "[parameters('priLocation')]"
+                    },
+                    "replicationContainerDstId": {
+                        "value": "[reference(variables('deployReplicationFabricComponents')).outputs.replicationContainerDstId.value]"
+                    },
+                    "replicationContainerSrcName": {
+                        "value": "[reference(variables('deployReplicationFabricComponents')).outputs.replicationContainerSrcName.value]"
+                    },
+                    "replicationFabricSrcName": {
+                        "value": "[reference(variables('deployReplicationFabricComponents')).outputs.replicationFabricSrcName.value]"
+                    },
+                    "resourceGroupRecoveryName": {
+                        "value": "[parameters('secResourceGroupName')]"
+                    },
+                    "rsVaultRepPolicyId": {
+                        "value": "[parameters('rsVaultRepPolicyBeResId')]"
+                    },
+                    "secLocation": {
+                        "value": "[parameters('secLocation')]"
+                    },
+                    "storageAccountCacheResId": {
+                        "value": "[parameters('storageAccountCacheResId')]"
+                    },
+                    "vaultName": {
+                        "value": "[parameters('rsVaultName')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('vmWinPriServer2Name')]"
+                    },
+                    "vmResourceId": {
+                        "value": "[reference(variables('deployVmWinPriServer2')).outputs.vmResourceId.value]"
+                    },
+                    "vmSku": {
+                        "value": "[variables('vmSku')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "[variables('templateUriReplItem')]",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
         }
     ],
     "outputs": {
