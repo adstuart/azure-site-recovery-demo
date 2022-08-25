@@ -626,6 +626,23 @@
                             }
                         },
                         {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]"
+                            ],
+                            "properties": {
+                                "providerSpecificInput": [
+                                    {
+                                        "instanceType": "A2A"
+                                    }
+                                ]
+                            }
+                        },
+                        {
                             "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'),'/',variables('replA2AMappingFailover'))]",
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
@@ -659,7 +676,6 @@
                                 "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
                             }
                         }
-
                     ]
                 }
             }
