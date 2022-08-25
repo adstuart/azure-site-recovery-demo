@@ -760,9 +760,7 @@
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings', parameters('rsVaultName'), variables('replA2AFabricObjDst'), 'azureNetwork', variables('replNetworkMappingDst'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings', parameters('rsVaultName'), variables('replA2AFabricObjDst'), 'azureNetwork', variables('replNetworkMappingDst'))]"
                             ],
                             "properties": {
                                 "policyId": "[parameters('rsVaultRepPolicyFeResId')]",
@@ -770,7 +768,7 @@
                                     "instanceType": "A2A",
                                     "recoveryAzureVMName": "[variables('vmWinPriServer1Name')]",
                                     "fabricObjectId":"[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer1Name'))]",
-                                    "recoveryContainerId": "[variables('replA2AFabricContDst')]",
+                                    "recoveryContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
                                     "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                     "primaryFabricLocation": "[parameters('priLocation')]",
                                     "recoveryFabricLocation": "[parameters('secLocation')]",
@@ -799,9 +797,7 @@
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2AFeProtItemVm1'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
-                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2AFeProtItemVm1'))]"
                             ],
                             "properties": {
                                 "policyId": "[parameters('rsVaultRepPolicyBeResId')]",
@@ -809,7 +805,7 @@
                                     "instanceType": "A2A",
                                     "recoveryAzureVMName": "[variables('vmWinPriServer2Name')]",
                                     "fabricObjectId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer2Name'))]",
-                                    "recoveryContainerId": "[variables('replA2AFabricContDst')]",
+                                    "recoveryContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
                                     "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                     "primaryFabricLocation": "[parameters('priLocation')]",
                                     "recoveryFabricLocation": "[parameters('secLocation')]",
