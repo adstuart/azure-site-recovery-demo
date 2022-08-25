@@ -791,7 +791,6 @@
                                             "primaryStagingAzureStorageAccountId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
                                         }
                                     ]
-
                                 }
                             }
                         },
@@ -800,7 +799,7 @@
                             "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems",
                             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2AFeProtItemVm1'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2AFeProtItemVm1'))]",
                                 "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
                                 "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
                             ],
