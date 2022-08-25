@@ -98,7 +98,6 @@
             "type": "Microsoft.RecoveryServices/vaults",
             "apiVersion": "[variables('rcvSvcVltApiVersion')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefGuid'))]"
             ],
             "location": "[parameters('seclocation')]",
             "tags": "[parameters('tags')]",
