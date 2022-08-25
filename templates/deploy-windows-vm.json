@@ -102,6 +102,7 @@
         "vmApiVersion": "2021-11-01",
         "modulesUrl": "[uri(parameters('linkedTemplateLocation'), concat('../dsc/windowsdevvm.zip'))]",
         "configurationFunction": "windowsdevvm.ps1\\WindowsDevVM",
+        "dataDiskType": "StandardSSD_LRS",
         "location": "[resourceGroup().location]",
         "nicName": "[concat(parameters('vmName'),parameters('uniqueData'))]",
         "osDiskType": "StandardSSD_LRS",
@@ -174,7 +175,7 @@
                             "lun": 0,
                             "createOption": "Empty",
                             "managedDisk": {
-                                "storageAccountType": "StandardSSD_LRS"
+                                "storageAccountType": "[variables('dataDiskType')]"
                             }
                         }
                     ],
@@ -305,7 +306,7 @@
                     "apiVersion": "[variables('vmApiVersion')]",
                     "location": "[variables('location')]",
                     "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",   
+                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
                         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'), '/extensions/WindowsDevVM')]"
                     ],
                     "properties": {
@@ -320,10 +321,29 @@
                         },
                         "protectedSettings": {
                             "commandToExecute": "[concat('powershell.exe -Command \"./', variables('scriptName'), '; exit 0;\"')]"
-                        }   
+                        }
                     }
                 }
             ]
         }
-    ]
+    ],
+    "outputs": {
+        "dataManagedDiskResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Compute/virtualMachines',parameters('vmName')).storageProfile.datadisks[0].managedDisk.id]"
+        },
+        "dataDiskType": {
+            "type": "string",
+            "value": "[variables('osDiskType')]"
+        },
+        "osManagedDiskResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Compute/virtualMachines',parameters('vmName')).storageProfile.osDisk.managedDisk.id]"
+        },
+        "osDiskType": {
+            "type": "string",
+            "value": "[variables('dataDiskType')]"
+        },
+
+    }
 }
