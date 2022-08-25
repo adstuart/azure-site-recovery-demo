@@ -209,20 +209,6 @@
                 "roleName": "[variables('roleDefCustomVaultRoleName')]",
                 "type": "customRole"
             }
-        },
-        {
-            "name": "[variables('roleAssignmentVaultRoleGuid')]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "[variables('authorizationApiVersion')]",
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefGuid'))]"
-            ],
-            "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefGuid'))]",
-                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
-                "principalType": "ServicePrincipal"
-            }
         }
     ],
     "outputs": {
