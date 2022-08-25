@@ -219,7 +219,7 @@
                     "primaryNetworkId": "[parameters('vnetDstResId')]"
                 },
                 "recoveryFabricName": "[variables('replA2AFabricObjSrc')]",
-                "recoveryNetworkId": "[parameters('vnetDstResId')]"
+                "recoveryNetworkId": "[parameters('vnetSrcResId')]"
             }
         }
     ],
