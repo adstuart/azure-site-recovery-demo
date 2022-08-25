@@ -769,7 +769,7 @@
                                 "providerSpecificDetails": {
                                     "instanceType": "A2A",
                                     "recoveryAzureVMName": "[variables('vmWinPriServer1Name')]",
-                                    "fabricObjectId":"[resourceId('Microsoft.Compute/virtualMachines',variables('vmWinPriServer1Name'))]",
+                                    "fabricObjectId":"[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer1Name'))]",
                                     "recoveryContainerId": "[variables('replA2AFabricContDst')]",
                                     "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                     "primaryFabricLocation": "[parameters('priLocation')]",
@@ -808,7 +808,7 @@
                                 "providerSpecificDetails": {
                                     "instanceType": "A2A",
                                     "recoveryAzureVMName": "[variables('vmWinPriServer2Name')]",
-                                    "fabricObjectId": "[resourceId('Microsoft.Compute/virtualMachines',variables('vmWinPriServer2Name'))]",
+                                    "fabricObjectId": "[resourceId(variables('priResourceGroupName'),'Microsoft.Compute/virtualMachines',variables('vmWinPriServer2Name'))]",
                                     "recoveryContainerId": "[variables('replA2AFabricContDst')]",
                                     "recoveryResourceGroupId": "[concat(subscription().id,'/resourceGroups/',parameters('secResourceGroupName'))]",
                                     "primaryFabricLocation": "[parameters('priLocation')]",
