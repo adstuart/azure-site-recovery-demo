@@ -711,6 +711,42 @@
                                 },
                                 "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
                             }
+                        },
+                        {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'),'/azureNetwork/',variables('replNetworkMappingSrc'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'), variables('replA2ABeMappingFailBack'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
+                            ],
+                            "properties": {
+                                "fabricSpecificDetails": {
+                                    "instanceType": "AzureToAzure",
+                                    "primaryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
+                                },
+                                "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replA2AFabricObjDst'))]",
+                                "recoveryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjDst'),'/azureNetwork/',variables('replNetworkMappingDst'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), 'azureNetwork', variables('replNetworkMappingSrc'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjSrc'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('rsVaultName'), variables('replA2AFabricObjDst'))]"
+                            ],
+                            "properties": {
+                                "fabricSpecificDetails": {
+                                    "instanceType": "AzureToAzure",
+                                    "primaryNetworkId": "[resourceId(parameters('secResourceGroupName'),'Microsoft.Network/virtualNetworks', variables('wlSecVnetName'))]"
+                                },
+                                "recoveryFabricName": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics',parameters('rsVaultName'),variables('replA2AFabricObjSrc'))]",
+                                "recoveryNetworkId": "[resourceId(variables('rgInfraName'),'Microsoft.Network/virtualnetworks',variables('wlPriVnetName'))]"
+                            }
                         }
                     ]
                 }
