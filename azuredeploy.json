@@ -234,7 +234,7 @@
                         "value": "[reference(variables('deployRsVlt')).outputs.rsVaultName.value]"
                     },
                     "rsVaultPrincipalId": {
-                        "value": "[reference(variables('deployRsVlt')).outputs.rvVaultPrincipalId.value]"         
+                        "value": "[reference(variables('deployRsVlt')).outputs.rsVaultPrincipalId.value]"         
                     },
                     "rsVaultRg": {
                         "value": "[variables('rgNameSecVlt')]"

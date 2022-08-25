@@ -38,7 +38,7 @@
                 "description": "The name of the resource group the Recovery Services Vault is in"
             }
         },
-        "rvVaultPrincipalId": {
+        "rsVaultPrincipalId": {
             "type": "string",
             "metadata": {
                 "description": "The principal id of the system-assigned managed identity of the Recovery Services Vault"
@@ -652,7 +652,7 @@
                             ],
                             "properties": {
                                 "roleDefinitionId": "[resourceId(parameters('rsVaultRg'),'Microsoft.Authorization/roleDefinitions',variables('roleDefGuid'))]",
-                                "principalId": "[parameters('rvVaultPrincipalId')]",
+                                "principalId": "[parameters('rsVaultPrincipalId')]",
                                 "principalType": "ServicePrincipal"
                             }
                         },

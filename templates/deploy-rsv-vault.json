@@ -151,7 +151,7 @@
             "type": "string",
             "value": "[variables('vaultName')]"
         },
-        "rvVaultPrincipalId": {
+        "rsVaultPrincipalId": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]"
         },
