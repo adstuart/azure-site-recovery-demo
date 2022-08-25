@@ -343,7 +343,6 @@
         "osDiskType": {
             "type": "string",
             "value": "[variables('dataDiskType')]"
-        },
-
+        }
     }
 }
