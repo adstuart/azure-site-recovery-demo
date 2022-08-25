@@ -96,6 +96,8 @@
         "replA2AFabricObjSrc": "a2areplobj-centralus",
         "replA2AMappingFailover": "a2arecovery-centralus",
         "replA2AMappingFailBack": "a2afailback-eastus2",
+        "replA2ABeMappingFailover": "a2aberecovery-centralus",
+        "replA2ABeMappingFailBack": "a2abefailback-eastus2",
         "replNetworkMappingSrc": "a2acentustoeastus2nwmap",
         "replNetworkMappingDst": "a2aeastus2tocentusnwmap",
         "rgInfraName": "[resourceGroup().name]",
@@ -669,6 +671,40 @@
                             ],
                             "properties": {
                                 "policyId": "[parameters('rsVaultRepPolicyFeResId')]",
+                                "providerSpecificInput": {
+                                    "instanceType": "A2A",
+                                    "agentAutoUpdateStatus": "Disabled"
+                                },
+                                "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'),'/',variables('replA2ABeMappingFailover'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]"
+                            ],
+                            "properties": {
+                                "policyId": "[parameters('rsVaultRepPolicyBeResId')]",
+                                "providerSpecificInput": {
+                                    "instanceType": "A2A",
+                                    "agentAutoUpdateStatus": "Disabled"
+                                },
+                                "targetProtectionContainerId": "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('rsVaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('rsVaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'),'/',variables('replA2ABeMappingFailback'))]",
+                            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+                            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+                            "dependsOn": [
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings', parameters('rsVaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2ABeMappingFailover'))]",
+                                "[resourceId(parameters('rsVaultRg'),'Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('rsVaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]"
+                            ],
+                            "properties": {
+                                "policyId": "[parameters('rsVaultRepPolicyBeResId')]",
                                 "providerSpecificInput": {
                                     "instanceType": "A2A",
                                     "agentAutoUpdateStatus": "Disabled"
