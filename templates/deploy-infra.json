@@ -109,7 +109,7 @@
         "vmWinPriServer1Ip": "10.0.2.5",
         "vmWinPriServer2Name": "vmwpri1cfbe",
         "vmWinPriServer2Ip": "10.0.3.5",
-        "vmWinPriServer3Name": "vmwpri2ncfe",
+        "vmWinPriServer3Name": "vmwpri2ncffe",
         "vmWinPriServer3Ip": "10.0.2.10",
         "workloadBeSubnetName": "snet-wl-be",
         "workloadFeSubnetName": "snet-wl-fe",
