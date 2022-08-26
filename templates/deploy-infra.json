@@ -620,6 +620,12 @@
                     "priLocation": {
                         "value": "[parameters('priLocation')]"
                     },
+                    "recoveryAz": {
+                        "value": "[variables('availabilityZone')]"
+                    },
+                    "recoverySubnet": {
+                        "value": "[variables('workloadFeSubnetName')]"
+                    },
                     "replicationContainerDstId": {
                         "value": "[reference(variables('deployReplicationFabricComponents')).outputs.replicationContainerDstId.value]"
                     },
@@ -685,6 +691,12 @@
                     },
                     "priLocation": {
                         "value": "[parameters('priLocation')]"
+                    },
+                    "recoveryAz": {
+                        "value": "[variables('availabilityZone')]"
+                    },
+                    "recoverySubnet": {
+                        "value": "[variables('workloadBeSubnetName')]"
                     },
                     "replicationContainerDstId": {
                         "value": "[reference(variables('deployReplicationFabricComponents')).outputs.replicationContainerDstId.value]"
