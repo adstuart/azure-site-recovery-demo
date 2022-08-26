@@ -4,8 +4,8 @@ This repository includes a variety of artifacts that can be used to learn and de
 
 The artifacts in this repository are focused on the following use cases:
 
-Replication of Azure VMs between Azure Regions
-Replication of VMWare VMs to Azure
+* Replication of Azure VMs between Azure Regions
+* Replication of VMWare VMs to Azure
 
 ## Artifacts
 The artifacts include a PowerPoint overview deck, deployable lab to learn and demonstrate features and capabilities, and a step-by-step guide on how to demonstrate specific features (COMING SOON).
