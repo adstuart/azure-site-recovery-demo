@@ -1,0 +1,273 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "priLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The primary region to deploy resources."
+            },
+            "allowedValues": [
+                "centralus",
+                "eastus",
+                "eastus2",
+                "northcentralus",
+                "southcentralus",
+                "westcentralus",
+                "westus",
+                "westus2"
+            ]
+        },
+        "secLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The secondary region region to deploy resources to. This should be the paired region of the primary region to support the cross region restore functionality"
+            },
+            "allowedValues": [
+                "centralus",
+                "eastus",
+                "eastus2",
+                "northcentralus",
+                "southcentralus",
+                "westcentralus",
+                "westus",
+                "westus2"
+            ]
+        },
+        "vmAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Administrator name for VMs that are created"
+            }
+        },
+        "vmAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the VMs that are created"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that wil be associated to the resources"
+            },
+            "defaultValue": {
+                "environment": "demo"
+            }
+        },
+        "uniqueData": {
+            "type": "string",
+            "metadata": {
+                "description": "Creates a new GUID to create uniqueness for resources"
+            },
+            "defaultValue": "[substring(newGuid(),0,8)]"
+        }
+    },
+    "variables": {
+        "resourcesApiVersion": "2020-06-01",
+        "deployLaw": "deploy-law",
+        "deployRgs": "deploy-demo-rgs",
+        "deployInfRes": "deploy-inf-res",
+        "deployRsVlt": "deploy-rs-vault",
+        "deployRsVltReplPolicies": "deploy-rs-replication-policies",
+        "rgNameSecVlt": "[concat('rgasrvltsec', parameters('uniqueData'))]",
+        "rgNamePriWl": "[concat('rgasrwlpri', parameters('uniqueData'))]",
+        "rgNameSecWl": "[concat('rgasrwlsec', parameters('uniqueData'))]",
+        "templateUriLaw": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-law.json'))]",
+        "templateUriRsVlt": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-rsv-vault.json'))]",
+        "templateUriRsVltReplPolicies": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-rsv-replication-policies.json'))]",
+        "templateUriInfRes": "[concat(uri(deployment().properties.templateLink.uri,'templates/deploy-infra.json'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('deployRgs')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "location": "[parameters('priLocation')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "name": "[variables('rgNameSecVlt')]",
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "[variables('resourcesApiVersion')]",
+                            "location": "[parameters('secLocation')]",
+                            "tags": "[parameters('tags')]",
+                            "properties": {
+                            }
+                        },
+                        {
+                            "name": "[variables('rgNamePriWl')]",
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "[variables('resourcesApiVersion')]",
+                            "location": "[parameters('priLocation')]",
+                            "tags": "[parameters('tags')]",
+                            "properties": {
+                            }
+                        },
+                        {
+                            "name": "[variables('rgNameSecWl')]",
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "[variables('resourcesApiVersion')]",
+                            "location": "[parameters('secLocation')]",
+                            "tags": "[parameters('tags')]",
+                            "properties": {
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[variables('deployLaw')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[variables('rgNamePriWl')]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('deployRgs'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "uniqueData": {
+                        "value": "[parameters('uniqueData')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "[variables('templateUriLaw')]",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
+        },
+        {
+            "name": "[variables('deployRsVlt')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[variables('rgNameSecVlt')]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('deployLaw'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "lawResourceId": {
+                        "value": "[reference(variables('deployLaw')).outputs.logAnalyticsResourceId.value]"
+                    },
+                    "priLocation": {
+                        "value": "[parameters('priLocation')]"
+                    },
+                    "secLocation": {
+                        "value": "[parameters('secLocation')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "uniqueData": {
+                        "value": "[parameters('uniqueData')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "[variables('templateUriRsVlt')]",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
+        },
+        {
+            "name": "[variables('deployRsVltReplPolicies')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[variables('rgNameSecVlt')]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('deployRsVlt'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "recSvcVaultName": {
+                        "value": "[reference(variables('deployRsVlt')).outputs.rsVaultName.value]"
+                    },             
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "uniqueData": {
+                        "value": "[parameters('uniqueData')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "[variables('templateUriRsVltReplPolicies')]",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
+        },
+        {
+            "name": "[variables('deployInfRes')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('resourcesApiVersion')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[variables('rgNamePriWl')]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('deployRsVltReplPolicies'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {               
+                    "lawResourceId": {
+                        "value": "[reference(variables('deployLaw')).outputs.logAnalyticsResourceId.value]"
+                    },
+                    "priLocation": {
+                        "value": "[parameters('priLocation')]"
+                    },
+                    "rsVaultRepPolicyFeResId": {
+                        "value": "[reference(variables('deployRsVltReplPolicies')).outputs.cstRepPolFeResId.value]"
+                    },
+                    "rsVaultRepPolicyBeResId": {
+                        "value": "[reference(variables('deployRsVltReplPolicies')).outputs.cstRepPolBeResId.value]"
+                    },
+                    "rsVaultName": {
+                        "value": "[reference(variables('deployRsVlt')).outputs.rsVaultName.value]"
+                    },
+                    "rsVaultRg": {
+                        "value": "[variables('rgNameSecVlt')]"
+                    },
+                    "storageAccountCacheResId": {
+                        "value": "[reference(variables('deployRsVlt')).outputs.storageAccountCacheResId.value]"
+                    },
+                    "secLocation": {
+                        "value": "[parameters('secLocation')]"
+                    },
+                    "secResourceGroupName": {
+                        "value": "[variables('rgNameSecWl')]"
+                    },            
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "uniqueData": {
+                        "value": "[parameters('uniqueData')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "vmAdminUsername": {
+                        "value": "[parameters('vmAdminUsername')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "[variables('templateUriInfRes')]",
+                    "contentVersion": "1.0.0.0"
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

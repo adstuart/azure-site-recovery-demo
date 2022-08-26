@@ -1,0 +1,164 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dataDiskResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the VM's data disk"
+            }
+        },
+        "dataDiskType": {
+            "type": "string",
+            "metadata": {
+                "description": "The type of managed disk for the data disk"
+            }
+        },
+        "osDiskResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the VM's OS disk"
+            }
+        },
+        "osDiskType": {
+            "type": "string",
+            "metadata": {
+                "description": "The type of managed disk for the os disk"
+            }
+        },
+        "priLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the region where the VM resources are deployed to"
+            }
+        },
+        "recoveryAz": {
+            "type": "string",
+            "metadata": {
+                "description": "The availability zone to recovery to"
+            }
+        },
+        "recoverySubnet": {
+            "type": "string",
+            "metadata": {
+                "description": "The subnet to recovery the machine to"
+            }
+        },
+        "replicationContainerDstId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the replication container in the recovery region "
+            }
+        },
+        "replicationContainerSrcName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the replication container in the source region"
+            }
+        },
+        "replicationFabricSrcName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the replication fabric in the source region"
+            }
+        },
+        "resourceGroupRecoveryName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the resource group the VM resources will failover to"
+            }
+        },
+        "rsVaultRepPolicyId": {
+            "type": "string",
+            "metadata": {
+                "description": "The replication policy resource id"
+            }
+        },
+        "secLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the region where the VM resources will failover to"
+            }
+        },
+        "storageAccountCacheResId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the cache storage account"
+            }
+        },
+        "subscriptionIdRecovery": {
+            "type": "string",
+            "metadata": {
+                "description": "The subscription id where the VM resources will failover to"
+            },
+            "defaultValue": "[subscription().id]"
+        },
+        "vaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Recovery Services Vault"
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the VM being enabled for replication"
+            }
+        },
+        "vmResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the VM being enabled for replication"
+            }
+        },
+        "vmSku": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM SKU the VM will be failed over to"
+            }
+        }
+    },
+    "variables": {
+        "rcvSvcVltApiVersion": "2022-04-01"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('vaultName'),'/',parameters('replicationFabricSrcName'),'/',parameters('replicationContainerSrcName'),'/',parameters('vmName'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectedItems",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "policyId": "[parameters('rsVaultRepPolicyid')]",
+                "providerSpecificDetails": {
+                    "instanceType": "A2A",
+                    "recoveryAzureVMName": "[parameters('vmName')]",
+                    "fabricObjectId": "[parameters('vmResourceId')]",
+                    "recoveryAvailabilityZone": "[parameters('recoveryAz')]",
+                    "recoveryContainerId": "[parameters('replicationContainerDstId')]",
+                    "recoveryResourceGroupId": "[concat(parameters('subscriptionIdRecovery'),'/resourceGroups/',parameters('resourceGroupRecoveryName'))]",
+                    "recoverySubnetName": "[parameters('recoverySubnet')]",
+                    "primaryFabricLocation": "[parameters('priLocation')]",
+                    "recoveryFabricLocation": "[parameters('secLocation')]",
+                    "recoveryAzureVMSize": "[parameters('vmSku')]",
+                    "vmManagedDisks": [
+                        {
+                            "diskId": "[parameters('osDiskResourceId')]",
+                            "recoveryResourceGroupId": "[concat(parameters('subscriptionIdRecovery'),'/resourceGroups/',parameters('resourceGroupRecoveryName'))]",
+                            "recoveryReplicaDiskAccountType": "[parameters('osDiskType')]",
+                            "recoveryTargetDiskAccountType": "[parameters('osDiskType')]",
+                            "primaryStagingAzureStorageAccountId": "[parameters('storageAccountCacheResId')]"
+                        },
+                        {
+                            "diskId": "[parameters('dataDiskResourceId')]",
+                            "recoveryResourceGroupId": "[concat(parameters('subscriptionIdRecovery'),'/resourceGroups/',parameters('resourceGroupRecoveryName'))]",
+                            "recoveryReplicaDiskAccountType": "[parameters('dataDiskType')]",
+                            "recoveryTargetDiskAccountType": "[parameters('dataDiskType')]",
+                            "primaryStagingAzureStorageAccountId": "[parameters('storageAccountCacheResId')]"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

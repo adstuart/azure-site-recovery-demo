@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "recSvcVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Recovery Services Vault"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be associated to the resources"
+            },
+            "defaultValue": {
+                "environment": "lab"
+            }
+        },
+        "uniqueData": {
+            "type": "string",
+            "metadata": {
+                "description": "Data used to append to resources to ensure uniqueness"
+            },
+            "defaultValue": "[substring(newGuid(),0,8)]"
+        }
+    },
+    "variables": {
+        "rcvSvcVltApiVersion": "2022-04-01",
+        "repPolicyFeName": "[concat('reppolicyfe', parameters('uniqueData'))]",
+        "repPolicyBeName": "[concat('reppolicybe', parameters('uniqueData'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('recSvcVaultName'), '/', variables('repPolicyBeName'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationPolicies",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "appConsistentFrequencyInMinutes": 120,
+                    "recoveryPointHistory": 4320
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('recSvcVaultName'), '/', variables('repPolicyFeName'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationPolicies",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "recoveryPointHistory": 4320
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "cstRepPolBeName": {
+            "type": "string",
+            "value": "[variables('repPolicyBeName')]"
+        },
+        "cstRepPolBeResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.RecoveryServices/vaults/replicationPolicies', parameters('recSvcVaultName'), variables('repPolicyBeName'))]"
+        },
+        "cstRepPolFeName": {
+            "type": "string",
+            "value": "[variables('repPolicyFeName')]"
+        },
+        "cstRepPolFeResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.RecoveryServices/vaults/replicationPolicies', parameters('recSvcVaultName'), variables('repPolicyFeName'))]"
+        }
+    }
+}

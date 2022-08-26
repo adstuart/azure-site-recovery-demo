@@ -1,0 +1,224 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "lawResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the Log Analytics Workspace"
+            }
+        },
+        "priLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the location where the VM resources will be deployed"
+            }
+        },
+        "secLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the location where the VM resources will recover to"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be associated to the resources"
+            },
+            "defaultValue": {
+                "environment": "lab"
+            }
+        },
+        "uniqueData": {
+            "type": "string",
+            "metadata": {
+                "description": "Data used to append to resources to ensure uniqueness"
+            },
+            "defaultValue": "[substring(newGuid(),0,8)]"
+        }
+    },
+    "variables": {
+        "authorizationApiVersion": "2022-04-01",
+        "diagnosticApiVersion": "2017-05-01-preview",
+        "rcvSvcVltApiVersion": "2022-04-01",
+        "storageApiVersion": "2021-09-01",
+        "roleAssignmentVaultRoleStorageContributorGuid": "[guid(subscription().id, parameters('uniqueData'), variables('storageAccountCacheName'), 'account')]",
+        "roleAssignmentVaultRoleStorageBlobContributorGuid": "[guid(subscription().id, parameters('uniqueData'), variables('storageAccountCacheName'), 'blob')]",
+        "storageAccountCacheName": "[concat('stcache', parameters('uniqueData'))]",
+        "vaultName": "[concat('vltasr',parameters('uniqueData'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('storageAccountCacheName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[parameters('priLocation')]",
+            "tags": "[parameters('tags')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+            },
+            "resources": [
+            ]
+        },
+        {
+            "name": "[variables('vaultName')]",
+            "type": "Microsoft.RecoveryServices/vaults",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]"
+            ],
+            "location": "[parameters('seclocation')]",
+            "tags": "[parameters('tags')]",
+
+            "sku": {
+                "name": "RS0",
+                "tier": "Standard"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "monitoringSettings": {
+                    "azureMonitorAlertSettings": {
+                        "alertsForAllJobFailures": "Enabled"
+                    },
+                    "classicAlertSettings": {
+                        "alertsForCriticalOperations": "Disabled"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(variables('vaultName'),'/','vaultconfig')]",
+            "type": "Microsoft.RecoveryServices/vaults/backupconfig",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "enhancedSecurityState": "Disabled",
+                "isSoftDeleteFeatureStateEditable": true,
+                "softDeleteFeatureState": "Disabled"
+            }
+        },
+        {
+            "name": "[concat(variables('vaultName'),'/','vaultstorageconfig')]",
+            "type": "Microsoft.RecoveryServices/vaults/backupstorageconfig",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "storageModelType": "ZoneRedundant"
+            }
+        },
+        {
+            "name": "[concat(variables('vaultName'),'/microsoft.insights/diag')]",
+            "type": "Microsoft.RecoveryServices/vaults/providers/diagnosticSettings",
+            "apiVersion": "[variables('diagnosticApiVersion')]",
+            "tags": "[parameters('tags')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/backupstorageconfig', variables('vaultName'), 'vaultstorageconfig')]"
+            ],
+            "properties": {
+                "name": "sendToWorkspace",
+                "workspaceId": "[parameters('lawResourceId')]",
+                "logs": [
+                    {
+                        "category": "AzureSiteRecoveryJobs",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryEvents",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryReplicatedItems",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryReplicationStats",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryRecoveryPoints",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryReplicationDataUploadRate",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AddonAzureBackupProtectedInstance",
+                        "enabled": true
+                    },
+                    {
+                        "category": "AzureSiteRecoveryProtectedDiskDataChurn",
+                        "enabled": true
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "Health",
+                        "enabled": true
+                    }
+                ]
+            },
+            "resources": [
+            ]
+        },
+        {
+            "name": "[variables('roleAssignmentVaultRoleStorageContributorGuid')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "scope": "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountCacheName'))]",
+            "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Authorization/roleDefinitions/','b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "name": "[variables('roleAssignmentVaultRoleStorageBlobContributorGuid')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "[variables('authorizationApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountCacheName'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+            ],
+            "scope": "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountCacheName'))]",
+            "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Authorization/roleDefinitions/','ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+                "principalId": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        }
+    ],
+    "outputs": {
+        "rsVaultName": {
+            "type": "string",
+            "value": "[variables('vaultName')]"
+        },
+        "rsVaultPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.RecoveryServices/vaults',variables('vaultName')),variables('rcvSvcVltApiVersion'), 'full').identity.principalId]"
+        },
+        "rsVaultResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+        },
+        "storageAccountCacheResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts',variables('storageAccountCacheName'))]"
+        }
+    }
+}

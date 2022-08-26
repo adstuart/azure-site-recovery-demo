@@ -1,0 +1,240 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "priLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the location where the VM resources will be deployed"
+            }
+        },
+        "rsVaultRepPolicyBeResId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the backend replication policy"
+            }
+        },
+        "rsVaultRepPolicyFeResId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the frontend replication policy"
+            }
+        },
+        "vnetDstResId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the vnet the VM resources will be recover to"
+            }
+        },
+        "vnetSrcResId": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource id of the vnet the VM resources will be deployed to"
+            }
+        },
+        "secLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the location where the VM resources will recover to"
+            }
+        },
+        "vaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Recover Services Vault"
+            }
+        }
+    },
+    "variables": {
+        "rcvSvcVltApiVersion": "2022-04-01",
+        "replA2ABeMappingFailover": "a2aberecovery-centralus",
+        "replA2ABeMappingFailBack": "a2abefailback-eastus2",
+        "replA2AFeMappingFailover": "a2arecovery-centralus",
+        "replA2AFeMappingFailBack": "a2afailback-eastus2",
+        "replA2AFabricContDst": "a2areplcon-eastus2",
+        "replA2AFabricContSrc": "a2areplcon-centralus",
+        "replA2AFabricObjDst": "[concat(parameters('secLocation'),'-a2afabric')]",
+        "replA2AFabricObjSrc": "[concat(parameters('priLocation'),'-a2afabric')]",
+        "replNetworkMappingSrc": "a2acentustoeastus2nwmap",
+        "replNetworkMappingDst": "a2aeastus2tocentusnwmap"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjSrc'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [],
+            "properties": {
+                "customDetails": {
+                    "instanceType": "Azure",
+                    "location": "[parameters('priLocation')]"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjDst'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjSrc'))]"
+            ],
+            "properties": {
+                "customDetails": {
+                    "instanceType": "Azure",
+                    "location": "[parameters('secLocation')]"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjDst'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjSrc'))]"
+            ],
+            "properties": {
+                "providerSpecificInput": [
+                    {
+                        "instanceType": "A2A"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjDst'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjSrc'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]"
+            ],
+            "properties": {
+                "providerSpecificInput": [
+                    {
+                        "instanceType": "A2A"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'),'/',variables('replA2AFeMappingFailover'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]"
+            ],
+            "properties": {
+                "policyId": "[parameters('rsVaultRepPolicyFeResId')]",
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "agentAutoUpdateStatus": "Disabled"
+                },
+                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('vaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'),'/',variables('replA2AFeMappingFailback'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings', parameters('vaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2AFeMappingFailover'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]"
+            ],
+            "properties": {
+                "policyId": "[parameters('rsVaultRepPolicyFeResId')]",
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "agentAutoUpdateStatus": "Disabled"
+                },
+                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('vaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjSrc'),'/',variables('replA2AFabricContSrc'),'/',variables('replA2ABeMappingFailover'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'))]"
+            ],
+            "properties": {
+                "policyId": "[parameters('rsVaultRepPolicyBeResId')]",
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "agentAutoUpdateStatus": "Disabled"
+                },
+                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('vaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjDst'),'/',variables('replA2AFabricContDst'),'/',variables('replA2ABeMappingFailback'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings', parameters('vaultName'), variables('replA2AFabricObjSrc'), variables('replA2AFabricContSrc'), variables('replA2ABeMappingFailover'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers', parameters('vaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'))]"
+            ],
+            "properties": {
+                "policyId": "[parameters('rsVaultRepPolicyBeResId')]",
+                "providerSpecificInput": {
+                    "instanceType": "A2A",
+                    "agentAutoUpdateStatus": "Disabled"
+                },
+                "targetProtectionContainerId": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('vaultName'),variables('replA2AFabricObjSrc'),variables('replA2AFabricContSrc'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjSrc'),'/azureNetwork/',variables('replNetworkMappingSrc'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings', parameters('vaultName'), variables('replA2AFabricObjDst'), variables('replA2AFabricContDst'), variables('replA2ABeMappingFailBack'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjSrc'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjDst'))]"
+            ],
+            "properties": {
+                "fabricSpecificDetails": {
+                    "instanceType": "AzureToAzure",
+                    "primaryNetworkId": "[parameters('vnetSrcResId')]"
+                },
+                "recoveryFabricName": "[variables('replA2AFabricObjDst')]",
+                "recoveryNetworkId": "[parameters('vnetDstResId')]"
+            }
+        },
+        {
+            "name": "[concat(parameters('vaultName'),'/',variables('replA2AFabricObjDst'),'/azureNetwork/',variables('replNetworkMappingDst'))]",
+            "type": "Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings",
+            "apiVersion": "[variables('rcvSvcVltApiVersion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationNetworks/replicationNetworkMappings', parameters('vaultName'), variables('replA2AFabricObjSrc'), 'azureNetwork', variables('replNetworkMappingSrc'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjSrc'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics', parameters('vaultName'), variables('replA2AFabricObjDst'))]"
+            ],
+            "properties": {
+                "fabricSpecificDetails": {
+                    "instanceType": "AzureToAzure",
+                    "primaryNetworkId": "[parameters('vnetDstResId')]"
+                },
+                "recoveryFabricName": "[variables('replA2AFabricObjSrc')]",
+                "recoveryNetworkId": "[parameters('vnetSrcResId')]"
+            }
+        }
+    ],
+    "outputs": {
+        "replicationContainerDstId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers',parameters('vaultName'),variables('replA2AFabricObjDst'),variables('replA2AFabricContDst'))]"
+        },
+        "replicationContainerSrcName": {
+            "type": "string",
+            "value": "[variables('replA2AFabricContSrc')]"
+        },
+        "replicationFabricSrcName": {
+            "type": "string",
+            "value": "[variables('replA2AFabricObjSrc')]"
+        }
+    }
+}
