@@ -51,7 +51,7 @@ Click the Deploy To Azure button below.
 
 3. Deploy the lab using the command (tags parameter is optional): 
 
-   * **az deployment sub create --name $DEPLOYMENT_NAME --location $DEPLOYMENT_LOCATION --template-uri https://raw.githubusercontent.com/mattfeltonma/azure-site-recovery-demo/main/azuredeploy.json --parameters priLocation=$LOCATION secLocation=$SEC_LOCATION vmAdminUsername=$ADMIN_USER_NAME tags='{"mytag":"value"}'**
+   * **az deployment sub create --name $DEPLOYMENT_NAME --location $DEPLOYMENT_LOCATION --template-uri https://raw.githubusercontent.com/mattfeltonma/azure-site-recovery-demo/main/azuredeploy.json --parameters priLocation=$PRI_LOCATION secLocation=$SEC_LOCATION vmAdminUsername=$ADMIN_USER_NAME tags='{"mytag":"value"}'**
 
 4.  You will be prompted to provide a password for the local administrator of the virtual machine.
 
